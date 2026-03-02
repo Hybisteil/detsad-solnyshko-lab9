@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8"> <!-- Кодировка для поддержки русского текста -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Список детей - группа Солнышко</title>
+    <style>
+        /* Базовые стили для страницы */
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 0 20px;
+            background-color: #f0f8ff; /* Нежный голубоватый фон */
+        }
+
+        /* Заголовок группы */
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ffb6c1; /* Розовая линия */
+        }
+
+        /* Контейнер для ввода */
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        /* Поле ввода имени */
+        #nameInput {
+            flex: 1;
+            padding: 12px;
+            font-size: 16px;
+            border: 2px solid #ffb6c1;
+            border-radius: 8px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        #nameInput:focus {
+            border-color: #4caf50;
+        }
+
+        /* Зеленая кнопка "Добавить" */
+        #addBtn {
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        #addBtn:hover {
+            background-color: #45a049;
+        }
+
+        /* Блок для ошибок */
+        #errorDiv {
+            color: #ff3333;
+            min-height: 25px;
+            font-size: 14px;
+            margin-bottom: 15px;
+            padding: 8px;
+            background-color: #fff0f0;
+            border-radius: 5px;
+            border-left: 4px solid #ff3333;
+        }
+
+        /* Список детей */
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        /* Элемент списка */
+        li {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: white;
+            padding: 12px 20px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border-left: 5px solid #ffb6c1;
+            font-size: 16px;
+        }
+
+        /* Имя ребёнка */
+        .child-name {
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        /* Красные кнопки удаления */
+        .deleteBtn {
+            background-color: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            font-size: 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        .deleteBtn:hover {
+            background-color: #ff5252;
+        }
+
+        /* Подпись студента */
+        .student-signature {
+            margin-top: 40px;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            padding: 15px;
+            border-top: 1px dashed #ffb6c1;
+        }
+    </style>
+</head>
+<body>
+    <h1>👧 Список детей в группе "Солнышко" 👦</h1>
+    
+    <!-- Поле ввода и кнопка добавления -->
+    <div class="input-group">
+        <input type="text" id="nameInput" placeholder="Введите имя ребёнка..." maxlength="30">
+        <button id="addBtn">Добавить</button>
+    </div>
+
+    <!-- Блок для отображения ошибок -->
+    <div id="errorDiv"></div>
+
+    <!-- Список детей -->
+    <ul id="childrenList"></ul>
+
+    <!-- Подпись студента -->
+    <div class="student-signature">
+        Студент: Почикаев К.А., группа ИС23-01-1П, вариант 14
+    </div>
+
+    <script>
+        // --- Инициализация данных ---
+        // Массив для хранения детей. Каждый ребенок: { id: число, name: строка }
+        let children = [];
+
+        // Тестовые имена (3-4 штуки) - добавляем при загрузке страницы
+        // Используем Date.now() с разницей во времени для уникальности id
+        children.push(
+            { id: Date.now() - 4000, name: 'Анна' },
+            { id: Date.now() - 3000, name: 'Иван' },
+            { id: Date.now() - 2000, name: 'Мария' },
+            { id: Date.now() - 1000, name: 'Дмитрий' }
+        );
+
+        // --- Получаем ссылки на элементы DOM ---
+        const nameInput = document.getElementById('nameInput');
+        const addBtn = document.getElementById('addBtn');
+        const errorDiv = document.getElementById('errorDiv');
+        const childrenList = document.getElementById('childrenList');
+
+        // --- Функция отрисовки списка детей ---
+        function renderList() {
+            // Очищаем список
+            childrenList.innerHTML = '';
+
+            // Перебираем всех детей в массиве
+            children.forEach(child => {
+                // Создаем элемент <li>
+                const li = document.createElement('li');
+                
+                // Создаем span для имени (чтобы легче стилизовать)
+                const nameSpan = document.createElement('span');
+                nameSpan.textContent = child.name;
+                nameSpan.classList.add('child-name');
+                
+                // Создаем кнопку удаления
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = 'Удалить';
+                deleteBtn.classList.add('deleteBtn');
+                
+                // При клике на кнопку удаления вызываем функцию удаления
+                deleteBtn.addEventListener('click', function() {
+                    deleteChild(child.id);
+                });
+
+                // Добавляем span и кнопку в элемент <li>
+                li.appendChild(nameSpan);
+                li.appendChild(deleteBtn);
+                
+                // Добавляем <li> в список <ul>
+                childrenList.appendChild(li);
+            });
+        }
+
+        // --- Функция добавления нового ребёнка ---
+        function addItem() {
+            // Получаем имя из поля, обрезаем пробелы
+            const childName = nameInput.value.trim();
+
+            // Очищаем предыдущее сообщение об ошибке
+            errorDiv.textContent = '';
+
+            // Проверка на пустое имя
+            if (childName === '') {
+                errorDiv.textContent = 'Имя не может быть пустым';
+                nameInput.focus(); // ставим фокус обратно в поле
+                return;
+            }
+
+            // Проверка на минимальную длину (минимум 2 символа для имён типа "Ия", "Ян")
+            if (childName.length < 2) {
+                errorDiv.textContent = 'Имя должно содержать минимум 2 символа';
+                nameInput.focus();
+                return;
+            }
+
+            // Проверка на допустимые символы (только буквы, пробелы и дефисы для двойных имён)
+            const nameRegex = /^[а-яА-ЯёЁa-zA-Z\s-]+$/;
+            if (!nameRegex.test(childName)) {
+                errorDiv.textContent = 'Имя может содержать только буквы, пробелы и дефис';
+                nameInput.focus();
+                return;
+            }
+
+            // Создаем объект ребёнка. id = текущее время в миллисекундах (уникально)
+            const newChild = {
+                id: Date.now(),
+                name: childName
+            };
+
+            // Добавляем ребёнка в массив
+            children.push(newChild);
+
+            // Перерисовываем список
+            renderList();
+
+            // Очищаем поле ввода
+            nameInput.value = '';
+
+            // Ставим фокус обратно в поле для удобства
+            nameInput.focus();
+        }
+
+        // --- Функция удаления ребёнка по id ---
+        function deleteChild(id) {
+            // Фильтруем массив: оставляем всех детей, кроме того, у которого id совпадает
+            children = children.filter(child => child.id !== id);
+
+            // Перерисовываем список
+            renderList();
+            
+            // Ставим фокус обратно в поле (для удобства после удаления)
+            nameInput.focus();
+        }
+
+        // --- Обработчик для кнопки "Добавить" ---
+        addBtn.addEventListener('click', addItem);
+
+        // --- Обработчик для нажатия Enter в поле ввода ---
+        nameInput.addEventListener('keydown', function(event) {
+            // Если нажата клавиша Enter
+            if (event.key === 'Enter') {
+                // Отменяем стандартное поведение
+                event.preventDefault();
+                // Вызываем добавление ребёнка
+                addItem();
+            }
+        });
+
+        // --- Первоначальная отрисовка списка при загрузке страницы ---
+        renderList();
+    </script>
+</body>
+</html>
